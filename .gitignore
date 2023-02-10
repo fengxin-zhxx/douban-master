@@ -1,0 +1,6 @@
+# python cache
+__pycache__/
+*.py[cod]
+
+#html
+html/
