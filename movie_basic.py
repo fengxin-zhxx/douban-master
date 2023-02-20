@@ -1,6 +1,7 @@
 from lxml.html import tostring
 import re
 
+
 def get_basic_data(movie):
     # 电影信息
     movie_info = movie.xpath('div[@class="info"]')[0]
@@ -33,9 +34,9 @@ def get_basic_data(movie):
         quote_str = movie_quote[0].xpath('span/text()')[0]
     else:
         quote_str = ''
-        
+
     # 电影详情URL
     page_url = re.findall(
         r'<a href="(.*)" class="">', movie_div)[0]
-    
+
     return name1, name2, score, comment, quote_str, page_url

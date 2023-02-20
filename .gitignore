@@ -4,3 +4,9 @@ __pycache__/
 
 #html
 html/
+
+#csv
+csv/
+
+#pycharm 
+.idea/

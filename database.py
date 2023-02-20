@@ -1,16 +1,20 @@
+import warnings
 import pymysql
+import pandas as pd
 
-
+# 定义数据库连接
 db = pymysql.connect(host='localhost',
                      user='root',
                      password='root',
                      database='douban')
 
+
+# 定义游标
 cursor = db.cursor()
 
-
+# 存储电影数据
 def db_store(movie_data):
-    name1, name2, score, comment, quote_str, page_url, director, actor, place, lang, year, length = movie_data
+    name1, name2, score, comment, quote_str, page_url, director, actor, type, place, lang, year, length = movie_data
     
     # 插入movie表
     sql = 'insert into movie(name, global_name, score, comment, quote, url, year, length) values("%s", "%s", %s, %s, "%s", "%s", %s, %s)' % (
@@ -72,7 +76,7 @@ def db_store(movie_data):
         if len(res) == 0:
             sql = 'insert into place(name) values ("%s")' % i
             cursor.execute(sql)
-            sql = 'select last_insert_id()' # 插入的演员id
+            sql = 'select last_insert_id()'
             cursor.execute(sql)
             place_id = cursor.fetchone()[0]
         else:
@@ -94,7 +98,7 @@ def db_store(movie_data):
         if len(res) == 0:
             sql = 'insert into lang(name) values ("%s")' % i
             cursor.execute(sql)
-            sql = 'select last_insert_id()' # 插入的演员id
+            sql = 'select last_insert_id()'
             cursor.execute(sql)
             lang_id = cursor.fetchone()[0]
         else:
@@ -107,6 +111,54 @@ def db_store(movie_data):
             cursor.execute(sql)        
         except:
             print("error:" + sql)
-    
+    # type
+    for i in type:
+        sql = 'select id from type where name="%s"' % i
+        cursor.execute(sql)
+        res = cursor.fetchall()
+        if len(res) == 0:
+            sql = 'insert into type(name) values ("%s")' % i
+            cursor.execute(sql)
+            sql = 'select last_insert_id()'
+            cursor.execute(sql)
+            type_id = cursor.fetchone()[0]
+        else:
+            type_id = res[0][0]
+        # movie_type
+        try:
+            sql = 'insert into movie_type(type_id, movie_id) values(%s, %s)' % (type_id, movie_id)
+            cursor.execute(sql)        
+        except:
+            print("error:" + sql)
+            
     
     db.commit() # 提交
+   
+# 从运行结果中读取参数列
+def get_data_from_res(res, params):
+    for row in res:
+        for j in range(len(params)):
+            params[j].append(row[j])
+            
+# 读取数据库中各表的名称
+def get_table_names():
+    sql = 'select table_name from information_schema.tables where table_schema="douban"'
+    names = execute_sql(sql, 1)[0]
+    return names
+    
+# 读取数据库内容到DataFrame, 并存到CSV
+def csv_store():
+    names = get_table_names()
+    for name in names:  
+        # 避免pandas版本高的警告
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore") 
+            df = pd.read_sql('select * from ' + name, db)
+            df.to_csv('./csv/' + name + '.csv')
+    
+# 运行SQL, 返回指定数目的参数列表
+def execute_sql(sql, param_num):
+    cursor.execute(sql)
+    params = [[] for i in range(param_num)]
+    get_data_from_res(cursor.fetchall(), params)
+    return params

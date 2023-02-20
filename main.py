@@ -1,5 +1,4 @@
 import requests
-import re
 import lxml.html
 import pandas as pd
 import time
@@ -7,7 +6,7 @@ import time
 
 from movie_detail import get_detail_data
 from movie_basic import get_basic_data
-from database import db_store
+from database import db_store, csv_store
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0",
@@ -21,7 +20,7 @@ headers = {
 }
 
 # 是否使用本地文件测试
-local_test = False
+local_test = True
 
 
 def get_url(url: str, start: int) -> str:
@@ -54,7 +53,8 @@ def get_data(url: str):
         movie_divs = selector.xpath('//div[@class="item"]')
 
         for movie in movie_divs:
-            name1, name2, score, comment, quote_str, page_url = get_basic_data(movie)
+            name1, name2, score, comment, quote_str, page_url = get_basic_data(
+                movie)
 
             # 详情页内容爬取
             if local_test:
@@ -68,19 +68,22 @@ def get_data(url: str):
                     f.write(movie_html)
 
             # 详细信息
-            director, actor, place, lang, year, length = get_detail_data(movie_html)
+            director, actor, type, place, lang, year, length = get_detail_data(
+                movie_html)
 
             movie_data = [name1, name2, score, comment, quote_str,
-                          page_url, director, actor, place, lang, year, length]
-            
+                          page_url, director, actor, type, place, lang, year, length]
+
+            # 存储到数据库
             db_store(movie_data)
 
             # print(movie_data)
-            
+
             movies_data.append(movie_data)
 
+    csv_store()
     movies_data = pd.DataFrame(movies_data, columns=[
-        '中文名', '外文名', '评分', '评价人数', '电影语录', '详情URL', '导演', '主演', '地区', '语言', '上映年份', '时长'])
+        '中文名', '外文名', '评分', '评价人数', '电影语录',  '详情URL', '导演', '主演', '类型', '地区', '语言', '上映年份', '时长'])
 
     return movies_data
 
