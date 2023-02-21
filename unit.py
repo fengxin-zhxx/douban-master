@@ -1,7 +1,10 @@
-from movie_detail import get_detail_data 
+from database import *
 
-with open('./html/7号房的礼物.html', 'r') as f:
-    print(get_detail_data(f.read()))
-
-
+with open('quotes.txt','w+') as f:
+    sql = 'select quote from movie'
+    quotes = execute_sql(sql, 1)
+    # print(quotes[0])
+    for quote in quotes[0]:
+        f.write(quote)
+    
 
