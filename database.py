@@ -134,6 +134,15 @@ def db_store(movie_data):
     
     db.commit() # 提交
    
+# 豆瓣_猫眼数据库
+def db_store_2(data):
+    name, date, money, avg_money, avg_people, score, comment = data
+    sql =  'insert into maoyan_douban(name, date, money, avg_money, avg_people, score, comment) \
+            values("%s", "%s", "%s", "%s", "%s", "%s", "%s")' % (name, date, money, avg_money, avg_people, score, comment)
+    execute_sql(sql, 1)
+    db.commit()
+       
+
 # 从运行结果中读取参数列
 def get_data_from_res(res, params):
     for row in res:
