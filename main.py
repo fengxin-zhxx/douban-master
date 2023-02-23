@@ -2,11 +2,14 @@ import requests
 import lxml.html
 import pandas as pd
 import time
+import os
 
 
 from movie_detail import get_detail_data
 from movie_basic import get_basic_data
 from database import db_store, db_store_2, csv_store
+from lxml.html import tostring
+import re
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0",
@@ -28,7 +31,8 @@ def get_url(url: str, start: int) -> str:
 
 
 def get_html(url: str) -> str:
-    time.sleep(5)
+    time.sleep(3)
+    print('sleeping...')
     return requests.get(url, headers=headers).content.decode(encoding='utf-8')
 
 
@@ -95,28 +99,24 @@ url = "https://movie.douban.com/top250?start=0&filter="
 get_data(url).to_csv("result.csv")
 
 url_maoyan = 'https://piaofang.maoyan.com/rankings/year'
-url_prefix = 'https://www.douban.com/search?q='
+url_prefix = 'https://www.douban.com/search?cat=1002&q='
 
 def get_search_url(text):
     return url_prefix + text
 
-def get_data_douban(name : str, url : str):
-    if local_test:
-        with open("./html/search"+ name + ".html" , 'r', encoding='utf-8') as f:
-            html = f.read()
-    else:
-        html = get_html(url)
-        with open("./html/search"+ name + ".html", 'w+', encoding='utf-8') as f:
-            f.write(html.encode('utf-8').decode('utf-8'))
+def get_data_douban(name : str, html : str):
         
     movies = lxml.html.fromstring(html)
     score = movies.xpath('/html/body/div[3]/div[1]/div/div[1]/div[3]/div[2]/div[1]/div[2]/div/div/span[2]/text()')[0]
     comment = movies.xpath('/html/body/div[3]/div[1]/div/div[1]/div[3]/div[2]/div[1]/div[2]/div/div/span[3]/text()')[0]
     comment = int(comment[1:-4])
-    return score, comment
+    h3 = movies.xpath('/html/body/div[3]/div[1]/div/div[1]/div[3]/div[2]/div[1]/div[2]/div/h3')
+    h3 = tostring(h3[0], encoding="utf-8").decode("utf-8")
+    page_url = re.findall(r'<a href="(.*)" target=', h3)[0]
+    return score, comment, page_url
 
 
-def get_data_maoyan(url : str):
+def get_data_maoyan(html : str):
     if local_test:
         with open("./html/maoyan.html", 'r', encoding='utf-8') as f:
             html = f.read()
@@ -139,8 +139,30 @@ def get_data_maoyan(url : str):
         avg_money = float(li[3].xpath('text()')[0])
         avg_people = int(li[4].xpath('text()')[0])
         try:
-            score, comment = get_data_douban(name, get_search_url(name))
-            data = [name, date, money, avg_money, avg_people, score, comment]
+            search_file = "./html/search"+ name + ".html"
+            if local_test and os.path.isfile(search_file):
+                with open(search_file , 'r', encoding='utf-8') as f:
+                    html = f.read()
+            else:
+                html = get_html(get_search_url('[电影]' + name))
+                with open(search_file, 'w+', encoding='utf-8') as f:
+                    f.write(html.encode('utf-8').decode('utf-8'))
+                
+            score, comment, page_url = get_data_douban(name, html)
+            file_name = "./html/" + name + ".html"
+            # 详情页内容爬取
+            if local_test and os.path.isfile(file_name):
+                # 使用本地文件
+                movie_html = open(file_name, "r", encoding='utf-8').read()
+            else:
+                # 使用网络请求
+                movie_html = get_html(page_url)
+                with open("./html/" + name + ".html", 'w+', encoding='utf-8') as f:
+                    f.write(movie_html.encode('utf-8').decode('utf-8'))
+                    
+            director, actor, type, place, lang, year, length = get_detail_data(movie_html)
+            data = [name, date, money, avg_money, avg_people, score, comment, director, actor, type, place, lang, length]
+            # print(data)
             all_data.append(data)
             db_store_2(data)
             count += 1
@@ -148,8 +170,12 @@ def get_data_maoyan(url : str):
                 print("No." + str(count + 1) + " Done :" + name)
         except Exception as e:
             print("Error on searching " + name + '\n' + str(e))
+            # os.remove(search_file)
+            # os.remove(file_name)
         # break
-    all_data = pd.DataFrame(all_data, columns=['电影名', '上映日期', '票房(万元)', '平均票价', '场均人数', '豆瓣评分', '豆瓣评论数'])
+
+    all_data = pd.DataFrame(all_data, columns=['电影名', '上映日期', '票房(万元)', '平均票价', '场均人数', '豆瓣评分', '豆瓣评论数',
+                                    '导演', '演员', '类型', '地区', '语言', '时长'])
     
     all_data.to_csv('猫眼_豆瓣.csv')
 

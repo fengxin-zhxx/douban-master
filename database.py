@@ -136,10 +136,122 @@ def db_store(movie_data):
    
 # 豆瓣_猫眼数据库
 def db_store_2(data):
-    name, date, money, avg_money, avg_people, score, comment = data
-    sql =  'insert into maoyan_douban(name, date, money, avg_money, avg_people, score, comment) \
-            values("%s", "%s", "%s", "%s", "%s", "%s", "%s")' % (name, date, money, avg_money, avg_people, score, comment)
-    execute_sql(sql, 1)
+    name, date, money, avg_money, avg_people, score, comment, director, actor, type, place, lang, length = data
+    sql =  'insert into maoyan_movie(name, date, money, avg_money, avg_people, score, comment, length) \
+            values("%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s")' % (name, date, money, avg_money, avg_people, score, comment, length)
+    cursor.execute(sql)
+    
+    sql = 'select last_insert_id()'
+    cursor.execute(sql)
+    movie_id = cursor.fetchone()[0]
+    
+    # director表
+    for i in director:
+        sql = 'select id from director where name="%s"' % i
+        cursor.execute(sql)
+        res = cursor.fetchall()
+        if len(res) == 0:
+            sql = 'insert into director(name) values ("%s")' % i
+            cursor.execute(sql)
+            sql = 'select last_insert_id()' # 插入的导演id
+            cursor.execute(sql)
+            director_id = cursor.fetchone()[0]
+        else:
+            director_id = res[0][0]
+            
+        sql = 'insert into maoyan_movie_director(director_id,maoyan_id) values(%s, %s)' % (director_id, movie_id)
+        cursor.execute(sql)
+        
+    # actor
+    for i in actor:
+        sql = 'select id from actor where name="%s"' % i
+        cursor.execute(sql)
+        res = cursor.fetchall()
+        if len(res) == 0:
+            sql = 'insert into actor(name) values ("%s")' % i
+            cursor.execute(sql)
+            sql = 'select last_insert_id()' # 插入的演员id
+            cursor.execute(sql)
+            actor_id = cursor.fetchone()[0]
+        else:
+            actor_id = res[0][0]
+            
+        # actor_movie
+        try:
+            sql = 'insert into maoyan_movie_actor(actor_id, maoyan_id) values(%s, %s)' % (actor_id, movie_id)
+            cursor.execute(sql)        
+        except:
+            # TO DO 一部电影两个同名演员....(SB?)
+            print("error:" + sql)
+            # print(name1, actor_id, movie_id, i, sql)
+            # print(actor)
+            
+    # place
+    for i in place:
+        sql = 'select id from place where name="%s"' % i
+        cursor.execute(sql)
+        res = cursor.fetchall()
+        if len(res) == 0:
+            sql = 'insert into place(name) values ("%s")' % i
+            cursor.execute(sql)
+            sql = 'select last_insert_id()'
+            cursor.execute(sql)
+            place_id = cursor.fetchone()[0]
+        else:
+            place_id = res[0][0]
+            
+        # actor_movie
+        
+        try:
+            sql = 'insert into maoyan_movie_place(place_id, maoyan_id) values(%s, %s)' % (place_id, movie_id)
+            cursor.execute(sql)        
+        except:
+            print("error:" + sql)
+    
+    # lang
+    for i in lang:
+        sql = 'select id from lang where name="%s"' % i
+        cursor.execute(sql)
+        res = cursor.fetchall()
+        if len(res) == 0:
+            sql = 'insert into lang(name) values ("%s")' % i
+            cursor.execute(sql)
+            sql = 'select last_insert_id()'
+            cursor.execute(sql)
+            lang_id = cursor.fetchone()[0]
+        else:
+            lang_id = res[0][0]
+            
+        # actor_movie
+        
+        try:
+            sql = 'insert into maoyan_movie_lang(lang_id, maoyan_id) values(%s, %s)' % (lang_id, movie_id)
+            cursor.execute(sql)        
+        except:
+            print("error:" + sql)
+    # type
+    for i in type:
+        sql = 'select id from type where name="%s"' % i
+        cursor.execute(sql)
+        res = cursor.fetchall()
+        if len(res) == 0:
+            sql = 'insert into type(name) values ("%s")' % i
+            cursor.execute(sql)
+            sql = 'select last_insert_id()'
+            cursor.execute(sql)
+            type_id = cursor.fetchone()[0]
+        else:
+            type_id = res[0][0]
+        # movie_type
+        try:
+            sql = 'insert into maoyan_movie_type(type_id, maoyan_id) values(%s, %s)' % (type_id, movie_id)
+            cursor.execute(sql)        
+        except:
+            print("error:" + sql)
+            
+    
+    db.commit() # 提交
+    
     db.commit()
        
 
