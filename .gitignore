@@ -5,6 +5,7 @@ __pycache__/
 #html
 html/
 *.html
+*.htm
 
 #csv
 csv/
