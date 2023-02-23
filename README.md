@@ -10,7 +10,7 @@
 
 票房预测: 通过可视化分析得到的结论, 选取可能影响票房的因素, 建立预测模型和算法, 进行预测
 
-### 技术栈
+## 技术栈
 
 Python爬虫与数据处理: requests,  lxml,  re,  pandas  
 
@@ -23,7 +23,7 @@ Python爬虫与数据处理: requests,  lxml,  re,  pandas
 模型预测: sklearn,  numpy,  matplotlib
 
 
-### 可视化举例
+## 可视化举例
 ![p1](./pictures/p%20(1).png)
 ![p1](./pictures/p%20(2).png)
 ![p1](./pictures/p%20(3).png)
