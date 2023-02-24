@@ -24,12 +24,12 @@ Python爬虫与数据处理: requests,  lxml,  re,  pandas
 
 
 ## 可视化举例
-![p1](./pictures/p%20(1).png)
-![p1](./pictures/p%20(2).png)
-![p1](./pictures/p%20(3).png)
-![p1](./pictures/p%20(4).png)
-![p1](./pictures/p%20(5).png)
-![p1](./pictures/p%20(6).png)
+![p1](./result/p%20(1).png)
+![p1](./result/p%20(2).png)
+![p1](./result/p%20(3).png)
+![p1](./result/p%20(4).png)
+![p1](./result/p%20(5).png)
+![p1](./result/p%20(6).png)
 
 
 
