@@ -25,11 +25,28 @@ Python爬虫与数据处理: requests,  lxml,  re,  pandas
 
 ## 可视化举例
 ![p1](./result/p%20(1).png)
-![p1](./result/p%20(2).png)
-![p1](./result/p%20(3).png)
-![p1](./result/p%20(4).png)
-![p1](./result/p%20(5).png)
-![p1](./result/p%20(6).png)
+![p2](./result/p%20(2).png)
+![p3](./result/p%20(3).png)
+![p4](./result/p%20(4).png)
+![p5](./result/p%20(5).png)
+![p6](./result/p%20(6).png)
+![p7](./result/p%20(7).png)
+![p8](./result/p%20(8).png)
+![p9](./result/p%20(9).png)
+![p10](./result/p%20(10).png)
+![p11](./result/p%20(11).png)
+
+
+
+## 票房预测举例
+单位/万元
+
+![p1](./result/预测1.png)
+
+![p2](./result/预测2.png)
+
+
+
 
 
 
