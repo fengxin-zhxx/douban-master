@@ -24,7 +24,7 @@
 | visualization_pandas.ipynb | 数据可视化，数据使用pandas聚合等方式 |
 | predict.ipynb              | 票房预测模型的建立和预测举例         |
 | /html                      | 存放爬取的html文件                   |
-| /csv                       | 存放持久化pandas处理的dataframe数据      |
+| /csv                       | 存放pandas处理的dataframe数据      |
 | /result                    | 存放可视化结果，及数据库内容截图等       |
 
 
